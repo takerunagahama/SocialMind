@@ -1,0 +1,40 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: "django-insecure-slb)xl$$r+*rbteoq&kcm@7)@vavf+4!w(&nuwm4r3mlm$$tp+5q"
+      DEBUG: "True"
+      DATABASE_NAME: "socialmind_db"
+      DATABASE_USER: "socialmind_user"
+      DATABASE_PASSWORD: "CHgSuZyH8ecXuSsS9h"
+      DATABASE_HOST: "db"
+      DATABASE_PORT: "3306"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - socialmind-network
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: socialmind_db
+      MYSQL_USER: socialmind_user
+      MYSQL_PASSWORD: "CHgSuZyH8ecXuSsS9h"
+      MYSQL_ROOT_PASSWORD: "e3KRwufTQ7zzBa8FSCfJ99B"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+    networks:
+      - socialmind-network
+
+networks:
+  socialmind-network:
+    driver: bridge
