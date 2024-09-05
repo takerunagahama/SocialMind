@@ -3,9 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
-@login_required
-def profile_view(request):
-    return render(request, 'registration/profile.html')
 
 def home_view(request):
     return render(request, 'core/home.html')
