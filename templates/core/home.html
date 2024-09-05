@@ -36,7 +36,7 @@
             <p>こんにちは、{{ user.username }}さん！</p>
         {% endif %}
         <p>あなたの社会的知性値を測定します。以下のボタンをクリックして診断を開始してください。</p>
-        <button id="startTest">診断開始</button>
+        <a href="{% url 'question_view' %}" class="btn btn-primary" id="startTest">診断開始</a>
         <div id="result" class="hidden">
             <h2>あなたの社会的知性値</h2>
             <p id="score"></p>

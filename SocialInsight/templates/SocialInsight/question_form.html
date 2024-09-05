@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>質問フォーム</title>
+</head>
+<body>
+    <h1>質問に回答してください</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        <p><strong>質問:</strong> {{ question_text }}</p>
+        <input type="hidden" name="question_text" value="{{ question_text }}">
+        <input type="hidden" name="model_answer" value="{{ model_answer }}">
+        <input type="hidden" name="attribute" value="{{ attribute }}">
+
+        <label for="user_answer">あなたの回答:</label><br>
+        <textarea name="user_answer" id="user_answer" rows="4" cols="50"></textarea><br><br>
+
+        <input type="submit" value="回答を送信">
+    </form>
+</body>
+</html>
