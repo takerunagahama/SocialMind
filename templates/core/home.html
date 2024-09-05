@@ -1,0 +1,48 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社会的知性値診断</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">社会的知性値診断</a>
+            <ul class="nav-links">
+                <li><a href="#">ホーム</a></li>
+                <li><a href="#">診断について</a></li>
+                <li><a href="#">結果履歴</a></li>
+                <li><a href="#">お問い合わせ</a></li>
+                {% if user.is_authenticated %}
+                    <li>
+                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                            {% csrf_token %}
+                        </form>
+                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">ログアウト</a>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">ログイン</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>社会的知性値診断</h1>
+        {% if user.is_authenticated %}
+            <p>こんにちは、{{ user.username }}さん！</p>
+        {% endif %}
+        <p>あなたの社会的知性値を測定します。以下のボタンをクリックして診断を開始してください。</p>
+        <button id="startTest">診断開始</button>
+        <div id="result" class="hidden">
+            <h2>あなたの社会的知性値</h2>
+            <p id="score"></p>
+            <p id="interpretation"></p>
+        </div>
+    </div>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
