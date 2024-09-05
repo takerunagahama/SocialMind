@@ -28,6 +28,7 @@ class QandA(models.Model):
 
 class Scores(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='scores')
+    qanda_session = models.ForeignKey(QandA, on_delete=models.CASCADE, related_name='scores', default = 1)
     empathy = models.IntegerField(default=0)
     organization = models.IntegerField(default=0)
     visioning = models.IntegerField(default=0)
@@ -37,13 +38,12 @@ class Scores(models.Model):
     perseverance = models.IntegerField(default=0)
     total = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    session_id = models.IntegerField(default=0)
 
     @classmethod
-    def create_new_score(cls, user, new_scores):
-        session_id = cls.objects.filter(user=user).count() + 1
+    def create_new_score(cls, user, new_scores, qanda_session):
         return cls.objects.create(
             user = user,
+            qand_session = qanda_session,
             empathy = new_scores.get('empathy', 0),
             organization = new_scores.get('organization', 0),
             visioning = new_scores.get('visioning', 0),
@@ -52,11 +52,10 @@ class Scores(models.Model):
             team = new_scores.get('team', 0),
             perseverance = new_scores.get('perseverance', 0),
             total = new_scores.get('total', 0),
-            session_id = session_id
         )
 
     def __str__(self):
-        return f'{self.user.username}: {self.total}({self.session_id})'
+        return f'{self.user.username}: {self.total}({self.qanda_session})'
 
     class Meta:
         verbose_name = "Scores"

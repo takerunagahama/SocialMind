@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>セッションの選択</title>
+</head>
+<body>
+    <h1>セッションを選択してください</h1>
+    <form method="get">
+        {% csrf_token %}
+        <label for="session_id">セッションID:</label>
+        <select name="session_id" id="session_id">
+            {% for session in sessions %}
+                <option value="{{ session }}" {% if session|stringformat:"s" == session_id|stringformat:"s" %}selected{% endif %}>{{ session }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">レーダーチャートを生成</button>
+    </form>
+
+    <!-- 画像が生成された場合に表示 -->
+    {% if session_id %}
+        <h2>レーダーチャート</h2>
+        <img src="{% url 'radar_chart_image' session_id=session_id %}" alt="レーダーチャート">
+    {% endif %}
+</body>
+</html>

@@ -70,8 +70,8 @@ def generate_question_and_model_answer(attribute):
         logger.error(f"Error in API request or response parsing: {e}")
         question, model_answer = "N/A", "N/A"
     
-    attribute_label = attribute_labels[attribute]
+    # attribute_label = attribute_labels[attribute]
     
-    logger.info(f"Generated question and answer for attribute {attribute_label}: {question}, {model_answer}")
+    logger.info(f"Generated question and answer for attribute: {question}, {model_answer}")
     
-    return question, model_answer, attribute_label
+    return question, model_answer

@@ -14,7 +14,7 @@
             <ul class="nav-links">
                 <li><a href="#">ホーム</a></li>
                 <li><a href="#">診断について</a></li>
-                <li><a href="#">結果履歴</a></li>
+                <li><a href="{% url 'check_result' %}">結果履歴</a></li>
                 <li><a href="#">お問い合わせ</a></li>
                 {% if user.is_authenticated %}
                     <li>
