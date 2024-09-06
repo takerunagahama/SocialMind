@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 ATTRIBUTE_CHOICES = [
     ('empathy', '共感力'),
     ('organization', '組織理解'),
-    ('influence', '影響力'),
     ('visioning', 'ビジョニング'),
-    ('team', 'チームワーク力'),
+    ('influence', '影響力'),
     ('inspiration', '啓発力'),
+    ('team', 'チームワーク力'),
     ('perseverance', '忍耐力'),
     ('total', '合計点'),
 ]
@@ -70,9 +70,8 @@ class Messages(models.Model):
     ]
 
     attribute = models.CharField(max_length=20, choices=ATTRIBUTE_CHOICES)
-    category = models.CharField(max_length=20, choices=TYPE_CHOICES)
-    strength_text = models.TextField()
-    improvement_text = models.TextField()
+    category = models.CharField(max_length=20, choices=TYPE_CHOICES, default='')
+    message = models.TextField(default='')
     training_name = models.TextField()
     training_content = models.TextField()
 

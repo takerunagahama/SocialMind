@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import QandA
+from .models import QandA, Messages
 from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation
+import logging
 
+logger = logging.getLogger(__name__)
 
 ATTRIBUTE_CHOICES = [
     ('empathy', '共感力'),
@@ -65,6 +67,27 @@ def question_view(request):
 
         return render(request, 'SocialInsight/question_form.html', context)
 
+def get_messages_by_category(attribute_scores, category, is_positive=True, limit=2):
+    if is_positive:
+        sorted_scores = sorted(attribute_scores, key=lambda x: x[1], reverse=True)[:limit]
+    else:
+        sorted_scores = sorted(attribute_scores, key=lambda x: x[1])[:limit]
+
+    messages = []
+    
+    for attribute, _ in sorted_scores:
+        attribute_messages = Messages.objects.filter(attribute=attribute, category=category)[:limit]
+        
+        for message in attribute_messages:
+            messages.append({
+                'attribute': dict(ATTRIBUTE_CHOICES).get(attribute),
+                'message': message.message,
+                'training_name': message.training_name,
+                'training_content': message.training_content
+            })
+    
+    return messages
+        
 @login_required
 def check_result(request):
     sessions = QandA.objects.values_list('session_id', flat=True).distinct()
@@ -89,20 +112,29 @@ def check_result(request):
         total_score = user_scores.total
         total_deviation_value = deviation_values['total']
 
+        positive_z_scores = [(attribute, z_score) for attribute, z_score in deviation_values.items() if z_score >= 50 and attribute != 'total']
+        negative_z_scores = [(attribute, z_score) for attribute, z_score in deviation_values.items() if z_score < 50 and attribute != 'total']
+
+        logger.debug(f"Positive Z Scores: {positive_z_scores}")
+
+        strengths = get_messages_by_category(positive_z_scores or deviation_values.items(), 'strength', is_positive=True)
+        improvements = get_messages_by_category(negative_z_scores or deviation_values.items(), 'improvement', is_positive=False)
+
         return render(request, 'SocialInsight/check_result.html', {
             'sessions': sessions,
             'session_id': selected_session_id,
             'image_path': image_buffer,
             'score_data': score_data,
             'total_score': total_score,
-            'total_deviation_value': total_deviation_value
+            'total_deviation_value': total_deviation_value,
+            'strengths': strengths,
+            'improvements': improvements
         })
 
     return render(request, 'SocialInsight/check_result.html', {
         'sessions': sessions,
         'session_id': selected_session_id
     })
-
 
 @login_required
 def radar_chart_image(request, session_id):

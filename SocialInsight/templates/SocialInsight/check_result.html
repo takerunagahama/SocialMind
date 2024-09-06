@@ -44,16 +44,13 @@
     {% if session_id %}
         <h2>レーダーチャート</h2>
         
-        <!-- total_scoreをレーダーチャートの上に表示 -->
         <h3>合計スコア: {{ total_score }} (偏差値: {{ total_deviation_value|floatformat:1 }})</h3>
         
-        <!-- レーダーチャート画像 -->
         <div style="display: flex; align-items: flex-start;">
             <div>
                 <img src="{% url 'radar_chart_image' session_id=session_id %}" alt="レーダーチャート">
             </div>
 
-            <!-- スコアと偏差値をテーブルで表示 -->
             <div style="margin-left: 20px;">
                 <h3>スコアと偏差値</h3>
                 <table border="1" cellpadding="5">
@@ -76,6 +73,36 @@
                 </table>
             </div>
         </div>
-    {% endif %}
+
+        <h3>あなたの強みは：</h3>
+        <ul>
+            {% for strength in strengths %}
+                <li><strong>{{ strength.attribute }}</strong></li>
+                <p>{{ strength.message }}</p>
+            {% endfor %}
+        </ul>
+        
+        <h3>あなたの改善点は：</h3>
+        <ul>
+            {% for improvement in improvements %}
+            <li><strong>{{ improvement.attribute }}</strong></li>
+            <p>{{ improvement.message }}</p>
+            {% endfor %}
+        </ul>
+        
+        <h3>あなたにおすすめの研修は：</h3>
+        <ul>
+            {% for strength in strengths %}
+            <li><strong>{{ strength.training_name }}</strong></li>
+            <p>{{ strength.training_content }}</p>
+            {% endfor %}
+        </ul>
+        <ul>
+            {% for improvement in improvements %}
+            <li><strong>{{ improvement.training_name }}</strong></li>
+            <p>{{ improvement.training_content }}</p>
+            {% endfor %}
+        </ul>
+        {% endif %}
 </body>
 </html>

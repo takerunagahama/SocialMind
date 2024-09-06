@@ -93,7 +93,7 @@ def generate_radar_chart(session_id):
         y_offset = np.sin(angle) * 0.01  # (y方向)
         label.set_position((label.get_position()[0] + x_offset, label.get_position()[1] + y_offset))
 
-    ax.spines['polar'].set_color('lightgray')  # 外側の枠線の色を指定
+    ax.spines['polar'].set_color('lightgray')
     ax.spines['polar'].set_alpha(0.5)  # 透明度を設定 (0.0 = 完全に透明, 1.0 = 不透明)
 
 

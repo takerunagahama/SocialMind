@@ -38,8 +38,8 @@ def score_to_deviation(session_id):
     deviation_values = {}
 
     for field in score_fields:
-        print(f"Processing field: {field}")  # フィールド名をプリント
-        user_score_value = getattr(user_scores, field)  # ここでエラーが起こっているか確認
+        print(f"Processing field: {field}")
+        user_score_value = getattr(user_scores, field)
         mean = score_stats[field]['mean']
         std = score_stats[field]['std']
         deviation_value = 50 + 10 * (user_score_value - mean) / std

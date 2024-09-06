@@ -60,7 +60,6 @@ def generate_question_and_model_answer(attribute):
         )
         response_content = response.choices[0].message.content.strip()
         
-        # JSONパースに変更
         question, model_answer = json.loads(response_content)
         
     except json.JSONDecodeError as e:
@@ -69,9 +68,7 @@ def generate_question_and_model_answer(attribute):
     except Exception as e:
         logger.error(f"Error in API request or response parsing: {e}")
         question, model_answer = "N/A", "N/A"
-    
-    # attribute_label = attribute_labels[attribute]
-    
+        
     logger.info(f"Generated question and answer for attribute: {question}, {model_answer}")
     
     return question, model_answer
