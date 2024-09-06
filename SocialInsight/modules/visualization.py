@@ -3,7 +3,7 @@ import japanize_matplotlib
 import numpy as np
 import io
 from django.http import HttpResponse
-from .models import QandA, Scores
+from SocialInsight.models import QandA, Scores
 
 ATTRIBUTE_CHOICES = [
     ('empathy', '共感力'),
@@ -66,7 +66,7 @@ def generate_radar_chart(session_id):
     avg_values += avg_values[:1]
     angles += angles[:1]
 
-    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(5, 5), subplot_kw=dict(polar=True))
 
     ax.set_theta_offset(np.pi / 2)
     ax.set_theta_direction(-1)
@@ -82,16 +82,29 @@ def generate_radar_chart(session_id):
 
     ax.set_yticklabels([])
     ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(categories)
+    ax.set_xticklabels(categories, fontsize=8, color='black')
+    ax.set_rgrids([20, 40, 60, 80, 100], labels=["20", "40", "60", "80", "100"], angle=0, color="gray")
+    ax.set_position([0.2, 0.2, 0.6, 0.6])
+
+
+    for label, angle in zip(ax.get_xticklabels(), angles):
+        label.set_horizontalalignment('center')
+        x_offset = np.cos(angle) * 0.1  # (x方向)
+        y_offset = np.sin(angle) * 0.01  # (y方向)
+        label.set_position((label.get_position()[0] + x_offset, label.get_position()[1] + y_offset))
+
+    ax.spines['polar'].set_color('lightgray')  # 外側の枠線の色を指定
+    ax.spines['polar'].set_alpha(0.5)  # 透明度を設定 (0.0 = 完全に透明, 1.0 = 不透明)
+
 
     plt.title(f'{user_scores.user.username}-第{session_id}回目の成績')
 
-    plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.1))
+    plt.legend(loc='upper left', bbox_to_anchor=(-0.1, 1.1), fontsize=8)
     plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
 
     # バイナリデータを保存するためのバッファを作成
     buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
+    plt.savefig(buffer, format='png', transparent=True)
     plt.close(fig)
     buffer.seek(0)
     return buffer

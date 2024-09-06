@@ -12,7 +12,7 @@
         <div class="nav-container">
             <a href="#" class="logo">社会的知性値診断</a>
             <ul class="nav-links">
-                <li><a href="#">ホーム</a></li>
+                <li><a href="{% url 'home' %}">ホーム</a></li>
                 <li><a href="#">診断について</a></li>
                 <li><a href="{% url 'check_result' %}">結果履歴</a></li>
                 <li><a href="#">お問い合わせ</a></li>
@@ -36,7 +36,7 @@
             <p>こんにちは、{{ user.username }}さん！</p>
         {% endif %}
         <p>あなたの社会的知性値を測定します。以下のボタンをクリックして診断を開始してください。</p>
-        <a href="{% url 'question_view' %}" class="btn btn-primary" id="startTest">診断開始</a>
+        <div class="button"><a href="{% url 'question_view' %}">診断開始</a></div>
         <div id="result" class="hidden">
             <h2>あなたの社会的知性値</h2>
             <p id="score"></p>

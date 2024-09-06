@@ -1,6 +1,6 @@
 from openai import OpenAI
 import os
-from .models import QandA
+from SocialInsight.models import QandA
 import random
 import json
 import logging

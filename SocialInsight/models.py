@@ -4,11 +4,12 @@ from django.contrib.auth.models import User
 ATTRIBUTE_CHOICES = [
     ('empathy', '共感力'),
     ('organization', '組織理解'),
-    ('visioning', 'ビジョニング'),
     ('influence', '影響力'),
-    ('inspiration', '啓発力'),
+    ('visioning', 'ビジョニング'),
     ('team', 'チームワーク力'),
+    ('inspiration', '啓発力'),
     ('perseverance', '忍耐力'),
+    ('total', '合計点'),
 ]
 
 class QandA(models.Model):

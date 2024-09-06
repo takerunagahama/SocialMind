@@ -2,12 +2,17 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import QandA
-from .text_generation import generate_question_and_model_answer
-from .visualization import generate_radar_chart
+from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation
+
 
 ATTRIBUTE_CHOICES = [
-    'empathy', 'organization', 'visioning', 'influence',
-    'inspiration', 'team', 'perseverance'
+    ('empathy', '共感力'),
+    ('organization', '組織理解'),
+    ('influence', '影響力'),
+    ('visioning', 'ビジョニング'),
+    ('team', 'チームワーク力'),
+    ('inspiration', '啓発力'),
+    ('perseverance', '忍耐力'),
 ]
 
 @login_required
@@ -41,7 +46,8 @@ def question_view(request):
     else:
         # ユーザーに対してまだ出題していない属性を取得
         answered_attributes = QandA.objects.filter(user=request.user).values_list('attribute', flat=True)
-        remaining_attributes = list(set(ATTRIBUTE_CHOICES) - set(answered_attributes))
+        all_attributes = [field[0] for field in ATTRIBUTE_CHOICES]
+        remaining_attributes = list(set(all_attributes) - set(answered_attributes))
 
         if remaining_attributes:
             attribute = remaining_attributes[0]
@@ -65,10 +71,37 @@ def check_result(request):
     selected_session_id = request.GET.get('session_id')
 
     if selected_session_id:
-        image_buffer = generate_radar_chart(int(selected_session_id))
-        return render(request, 'SocialInsight/check_result.html', {'sessions': sessions, 'session_id': selected_session_id, 'image_path': image_buffer})
+        # 偏差値とスコアを取得
+        deviation_values, user_scores = score_to_deviation(int(selected_session_id))
 
-    return render(request, 'SocialInsight/check_result.html', {'sessions': sessions, 'session_id': selected_session_id})
+        # レーダーチャート画像を生成
+        image_buffer = generate_radar_chart(int(selected_session_id))
+
+        score_data = [
+            {
+                'field': field[1],
+                'score': getattr(user_scores, field[0]),
+                'deviation': deviation_values[field[0]]
+            }
+            for field in ATTRIBUTE_CHOICES if field[0] != 'total'
+        ]
+
+        total_score = user_scores.total
+        total_deviation_value = deviation_values['total']
+
+        return render(request, 'SocialInsight/check_result.html', {
+            'sessions': sessions,
+            'session_id': selected_session_id,
+            'image_path': image_buffer,
+            'score_data': score_data,
+            'total_score': total_score,
+            'total_deviation_value': total_deviation_value
+        })
+
+    return render(request, 'SocialInsight/check_result.html', {
+        'sessions': sessions,
+        'session_id': selected_session_id
+    })
 
 
 @login_required
