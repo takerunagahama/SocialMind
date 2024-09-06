@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>診断方法について</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">社会的知性値診断</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">ホーム</a></li>
+                <li><a href="{% url 'about' %}">診断について</a></li>
+                <li><a href="{% url 'check_result' %}">結果履歴</a></li>
+                <li><a href="#">お問い合わせ</a></li>
+                {% if user.is_authenticated %}
+                    <li>
+                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                            {% csrf_token %}
+                        </form>
+                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">ログアウト</a>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">ログイン</a></li>
+                {% endif %}            
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>診断方法について</h1>
+        <p>
+            当診断システムでは、AI技術をフル活用して、問題作成、解答の生成、そして評価までの全てを自動化しています。特に、<strong>OpenAI API</strong>を使用することで、個別の能力やスキルに基づいた質問や模範解答を自動生成しています。これにより、手動作業に伴うばらつきや、人間によるバイアスが介入することなく、一貫した高精度な診断を実現しています。
+        </p>
+        <h2>診断の流れ</h2>
+        <ol>
+            <li><strong>問題作成：</strong>指定された能力（例:共感力や影響力）に基づいて、AIがそのスキルを評価するための質問を生成します。この際、質問はAIが自動で作成しており、大学生や社会人が理解しやすい形で提供されます。</li>
+            <li><strong>解答の評価：</strong>ユーザーの解答は、<strong>BERT</strong>などの先進的な自然言語処理モデルによってテキストを数値化（ベクトル化）し、内容の理解度を基にAIがスコアリングします。これにより、解答の質や内容が精密に評価され、正確な結果が導かれます。</li>
+            <li><strong>コサイン類似度による分析：</strong>AIは、ユーザーの解答をベクトル形式で解析し、質問の模範解答との類似性を測定します。類似性は<strong>コサイン類似度</strong>を用いて計算され、数値が高いほど模範解答に近いと評価されます。これにより、解答の内容が定量的かつ客観的に評価されます。</li>
+            <li><strong>AIによる最終評価:</strong>最終的なスコアは、AIが模範解答との類似度と内容の整合性を基に総合的に判断します。評価は「共感力」「ビジョニング」「影響力」など複数の能力を基準に行われ、それぞれのスキルに対して個別のスコアが算出されます。</li>
+        </ol>
+        <p>
+            このように、当診断ではAIを中心に据えた評価機構を採用しており、人間の主観に左右されず、公平かつ客観的な診断結果を提供します。また、診断結果はユーザーの強みや改善すべき点を明確に示し、自己成長のための具体的な指針を得ることができます。
+        </p>
+    </div>
+</body>
+</html>

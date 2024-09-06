@@ -13,7 +13,7 @@
             <a href="#" class="logo">社会的知性値診断</a>
             <ul class="nav-links">
                 <li><a href="{% url 'home' %}">ホーム</a></li>
-                <li><a href="#">診断について</a></li>
+                <li><a href="{% url 'about' %}">診断について</a></li>
                 <li><a href="{% url 'check_result' %}">結果履歴</a></li>
                 <li><a href="#">お問い合わせ</a></li>
                 {% if user.is_authenticated %}
@@ -41,9 +41,7 @@
         <button class='btn btn-radius-solid' type="submit">レーダーチャートを生成</button>
     </form>
 
-    {% if session_id %}
-        <h2>レーダーチャート</h2>
-        
+    {% if session_id %}        
         <h3>合計スコア: {{ total_score }} (偏差値: {{ total_deviation_value|floatformat:1 }})</h3>
         
         <div style="display: flex; align-items: flex-start;">

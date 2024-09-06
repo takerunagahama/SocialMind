@@ -1,3 +1,3 @@
 from .text_generation import generate_question_and_model_answer
-from .visualization import generate_radar_chart
+from .radar_chart import generate_radar_chart
 from .score_conversion import score_to_deviation

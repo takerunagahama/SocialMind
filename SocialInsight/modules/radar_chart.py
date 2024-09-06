@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import japanize_matplotlib
 import numpy as np
 import io
-from django.http import HttpResponse
 from SocialInsight.models import QandA, Scores
 
 ATTRIBUTE_CHOICES = [
