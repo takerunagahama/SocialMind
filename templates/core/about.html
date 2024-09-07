@@ -1,36 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>診断方法について</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <nav>
-        <div class="nav-container">
-            <a href="#" class="logo">社会的知性値診断</a>
-            <ul class="nav-links">
-                <li><a href="{% url 'home' %}">ホーム</a></li>
-                <li><a href="{% url 'about' %}">診断について</a></li>
-                <li><a href="{% url 'check_result' %}">結果履歴</a></li>
-                <li><a href="#">お問い合わせ</a></li>
-                {% if user.is_authenticated %}
-                    <li>
-                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-                            {% csrf_token %}
-                        </form>
-                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">ログアウト</a>
-                    </li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">ログイン</a></li>
-                {% endif %}            
-            </ul>
-        </div>
-    </nav>
+{% extends "core/base.html" %}
 
-    <div class="container">
+{% block title %}診断方法について{% endblock title %}
+
+{% block content %}
         <h1>診断方法について</h1>
         <p>
             当診断システムでは、AI技術をフル活用して、問題作成、解答の生成、そして評価までの全てを自動化しています。特に、<strong>OpenAI API</strong>を使用することで、個別の能力やスキルに基づいた質問や模範解答を自動生成しています。これにより、手動作業に伴うばらつきや、人間によるバイアスが介入することなく、一貫した高精度な診断を実現しています。
@@ -46,5 +18,4 @@
             このように、当診断ではAIを中心に据えた評価機構を採用しており、人間の主観に左右されず、公平かつ客観的な診断結果を提供します。また、診断結果はユーザーの強みや改善すべき点を明確に示し、自己成長のための具体的な指針を得ることができます。
         </p>
     </div>
-</body>
-</html>
+{% endblock content %}

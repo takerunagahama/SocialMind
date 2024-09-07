@@ -90,7 +90,16 @@ def get_messages_by_category(attribute_scores, category, is_positive=True, limit
         
 @login_required
 def check_result(request):
-    sessions = QandA.objects.values_list('session_id', flat=True).distinct()
+    sessions = []
+    session_ids = QandA.objects.values_list('session_id', flat=True).distinct()
+    
+    for session_id in session_ids:
+        deviation_values, user_scores = score_to_deviation(session_id)
+        sessions.append({
+            'id': session_id,
+            'deviation_value': deviation_values['total']
+        })
+
     selected_session_id = request.GET.get('session_id')
 
     if selected_session_id:

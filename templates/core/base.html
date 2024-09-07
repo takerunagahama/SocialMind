@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}社会的知性値診断{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="logo">社会的知性値診断</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">ホーム</a></li>
+                <li><a href="{% url 'about' %}">診断について</a></li>
+                <li><a href="{% url 'check_result' %}">結果履歴</a></li>
+                <li><a href="#">お問い合わせ</a></li>
+                {% if user.is_authenticated %}
+                    <li>
+                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
+                            {% csrf_token %}
+                        </form>
+                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">ログアウト</a>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">ログイン</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

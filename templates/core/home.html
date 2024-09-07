@@ -1,48 +1,23 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>社会的知性値診断</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <nav>
-        <div class="nav-container">
-            <a href="#" class="logo">社会的知性値診断</a>
-            <ul class="nav-links">
-                <li><a href="{% url 'home' %}">ホーム</a></li>
-                <li><a href="{% url 'about' %}">診断について</a></li>
-                <li><a href="{% url 'check_result' %}">結果履歴</a></li>
-                <li><a href="#">お問い合わせ</a></li>
-                {% if user.is_authenticated %}
-                    <li>
-                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-                            {% csrf_token %}
-                        </form>
-                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">ログアウト</a>
-                    </li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">ログイン</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
+{% extends "core/base.html" %}
 
-    <div class="container">
-        <h1>社会的知性値診断</h1>
+{% block title %}社会的知性値診断{% endblock title %}
+
+{% block content %}
+    <h1>社会的知性値診断へようこそ</h1>
         {% if user.is_authenticated %}
-            <p>こんにちは、{{ user.username }}さん！</p>
+            <p>{{ greeting }}、{{ user.username }}さん！</p>
         {% endif %}
-        <p>あなたの社会的知性値を測定します。以下のボタンをクリックして診断を開始してください。</p>
+        <p>
+            これから、20問の質問を通して、あなたの社会的知性値(SQ)を測定します。<br>
+            社会的知性値について詳しく知りたい方は<a href='{% url 'sq_detail' %}'>こちら</a>をご覧ください<br>
+            診断を中断することも可能ですが、その場合は社会的知性の評価は低く算出されますので、できるだけ最後までお答えいただくことをお勧めします。<br>
+            診断が終了すると、結果とともに詳しい評価や、社会的知性値を高めるための具体的なアドバイスを提供します。<br>
+            それでは、以下のボタンをクリックして診断を開始してください。
+        </p>
         <div class="button"><a href="{% url 'question_view' %}">診断開始</a></div>
         <div id="result" class="hidden">
             <h2>あなたの社会的知性値</h2>
             <p id="score"></p>
             <p id="interpretation"></p>
         </div>
-    </div>
-    <script src="{% static 'js/script.js' %}"></script>
-</body>
-</html>
+{% endblock content %}

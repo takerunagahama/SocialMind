@@ -1,77 +1,58 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>セッションの選択</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
-    <nav>
-        <div class="nav-container">
-            <a href="#" class="logo">社会的知性値診断</a>
-            <ul class="nav-links">
-                <li><a href="{% url 'home' %}">ホーム</a></li>
-                <li><a href="{% url 'about' %}">診断について</a></li>
-                <li><a href="{% url 'check_result' %}">結果履歴</a></li>
-                <li><a href="#">お問い合わせ</a></li>
-                {% if user.is_authenticated %}
-                    <li>
-                        <form id="logout-form" action="{% url 'logout' %}" method="post" style="display: none;">
-                            {% csrf_token %}
-                        </form>
-                        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">ログアウト</a>
-                    </li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">ログイン</a></li>
-                {% endif %}
-            </ul>
-        </div>
-    </nav>
-    <h1>セッションを選択してください</h1>
+{% extends "core/base.html" %}
+
+{% block title %}セッションの選択{% endblock title %}
+
+{% block content %}
+    <h1>確認したい成績を選んでください</h1>
     <form method="get">
         {% csrf_token %}
         <label for="session_id">セッションID:</label>
         <select name="session_id" id="session_id">
             {% for session in sessions %}
-                <option value="{{ session }}" {% if session|stringformat:"s" == session_id|stringformat:"s" %}selected{% endif %}>{{ session }}</option>
+                <option value="{{ session.id }}" {% if session.id|stringformat:"s" == session_id|stringformat:"s" %}selected{% endif %}>
+                    {{ session.id }} (偏差値: {{ session.deviation_value|floatformat:1 }})
+                </option>
             {% endfor %}
-        </select>
+        </select>        
         <button class='btn btn-radius-solid' type="submit">レーダーチャートを生成</button>
     </form>
 
     {% if session_id %}        
-        <h3>合計スコア: {{ total_score }} (偏差値: {{ total_deviation_value|floatformat:1 }})</h3>
+        <h3 style="margin-left: 20px">合計スコア: {{ total_score }} (偏差値: {{ total_deviation_value|floatformat:1 }})</h3>
         
-        <div style="display: flex; align-items: flex-start;">
-            <div>
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;">
+            <div class="radar-container">
                 <img src="{% url 'radar_chart_image' session_id=session_id %}" alt="レーダーチャート">
             </div>
-
-            <div style="margin-left: 20px;">
-                <h3>スコアと偏差値</h3>
+        
+            <div style="margin-top: 20px;">
                 <table border="1" cellpadding="5">
                     <thead>
                         <tr>
-                            <th>領域</th>
-                            <th>スコア</th>
-                            <th>偏差値</th>
+                            <th></th>
+                            {% for data in score_data %}
+                            <th>{{ data.field }}</th>
+                            {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
-                        {% for data in score_data %}
                         <tr>
-                            <td>{{ data.field }}</td>
+                            <td>スコア</td>
+                            {% for data in score_data %}
                             <td>{{ data.score }}</td>
-                            <td>{{ data.deviation|floatformat:1 }}</td>
+                            {% endfor %}
                         </tr>
-                        {% endfor %}
+                        <tr>
+                            <td>偏差値</td>
+                            {% for data in score_data %}
+                            <td>{{ data.deviation|floatformat:1 }}</td>
+                            {% endfor %}
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
+        
         <h3>あなたの強みは：</h3>
         <ul>
             {% for strength in strengths %}
@@ -102,5 +83,4 @@
             {% endfor %}
         </ul>
         {% endif %}
-</body>
-</html>
+{% endblock content %}

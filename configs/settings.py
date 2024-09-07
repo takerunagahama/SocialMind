@@ -24,7 +24,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '41b5-60-137-239-185.ngrok-free.app']
 
 # Application definition
 
@@ -69,6 +69,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'configs.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = ['https://41b5-60-137-239-185.ngrok-free.app']
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
