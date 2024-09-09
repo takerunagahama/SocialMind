@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import QandA, Messages
+from .models import QandA, Messages, Session
 from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -19,28 +20,49 @@ ATTRIBUTE_CHOICES = [
 
 @login_required
 def start_diagnosis_view(request):
-    session_id = Qand.objects.filter(user=request.user).count() + 1
-    request.session['current_session_id'] = session_id
-    
+    session, created = Session.objects.get_or_create(user=request.user)
+
+    if not created:
+        session.session_id += 1
+        session.save()
+    else:
+        session.session_id = 1
+        session.save()
+
+    request.session['current_session_id'] = session.session_id
+
     return redirect('question_view')
 
 @login_required
 def question_view(request):
+    session_id = request.session.get('current_session_id')
+
+    # current_session_idでのユーザーの回答数を取得
+    answered_count = QandA.objects.filter(user=request.user, session_id=session_id).count()
+
+    # 20問に達していたら、診断完了ページにリダイレクト
+    if answered_count >= 20:
+        return redirect('diagnosis_complete')
+
     if request.method == 'POST':
+        # 中断ボタンが押されたとき
+        if "canceled" in request.POST:
+            return redirect('diagnosis_complete')
+
         # ユーザーの回答を取得
         user_answer = request.POST.get('user_answer')
         question_text = request.POST.get('question_text')
         model_answer = request.POST.get('model_answer')
         attribute = request.POST.get('attribute')
-        
+
         # QandAモデルに保存
         QandA.objects.create(
-            user = request.user,
-            question_text = question_text,
-            model_answer = model_answer,
-            user_answer = user_answer,
-            attribute = attribute,
-            session_id = request.session.get('current_session_id', 1)
+            user=request.user,
+            question_text=question_text,
+            model_answer=model_answer,
+            user_answer=user_answer,
+            attribute=attribute,
+            session_id=session_id
         )
 
         return redirect('question_view')
@@ -52,9 +74,9 @@ def question_view(request):
         remaining_attributes = list(set(all_attributes) - set(answered_attributes))
 
         if remaining_attributes:
-            attribute = remaining_attributes[0]
+            attribute = remaining_attributes[0]  # まだ出題されていない属性を使う
         else:
-            attribute = random.choice(ATTRIBUTE_CHOICES)
+            attribute = random.choice(all_attributes)  # 全て出題した後はランダムに選ぶ
 
         # 問題文を生成
         question_text, model_answer = generate_question_and_model_answer(attribute)
@@ -62,10 +84,17 @@ def question_view(request):
         context = {
             'question_text': question_text,
             'model_answer': model_answer,
-            'attribute': attribute
+            'attribute': attribute,
+            'answered_count': answered_count
         }
 
         return render(request, 'SocialInsight/question_form.html', context)
+
+
+# 診断完了
+@login_required
+def diagnosis_complete(request):
+    return render(request, 'SocialInsight/diagnosis_complete.html')
 
 def get_messages_by_category(attribute_scores, category, is_positive=True, limit=2):
     if is_positive:
@@ -149,3 +178,16 @@ def check_result(request):
 def radar_chart_image(request, session_id):
     image_buffer = generate_radar_chart(int(session_id))
     return HttpResponse(image_buffer, content_type='image/png')
+
+@login_required
+def answer_list_view(request, session_id=None):
+
+    if request.method == 'POST':
+        session_id = request.POST.get('session_id')
+
+    if session_id:    
+        answer_lists = QandA.objects.filter(session_id = session_id)
+    else:
+        answer_lists = []
+
+    return render(request, 'SocialInsight/answer_list.html', {'answer_lists': answer_lists})

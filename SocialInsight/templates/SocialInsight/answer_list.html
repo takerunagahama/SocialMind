@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+
+{% block title %}過去のQ and Aを確認する{% endblock title %}
+
+{% block content %}
+    <form method="POST">
+        {% csrf_token %}
+        <label for="session_id">Session IDを入力:</label>
+        <input type="number" id="session_id" name="session_id" value="{{ session_id }}">
+        <button type="submit">検索</button>
+    </form>
+
+    {% if answer_lists %}
+        <table>
+            <thead>
+                <tr>
+                    <th>領域名</th>
+                    <th>質問</th>
+                    <th>モデル回答</th>
+                    <th>回答</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ans_list in answer_lists %}
+                <tr>
+                    <td>{{ ans_list.attribute }}</td>
+                    <td>{{ ans_list.question_text }}</td>
+                    <td>{{ ans_list.model_answer }}</td>
+                    <td>{{ ans_list.user_answer }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>データが見つかりません</p>
+    {% endif %}
+{% endblock content %}

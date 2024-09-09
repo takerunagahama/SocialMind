@@ -14,7 +14,7 @@
                 </option>
             {% endfor %}
         </select>        
-        <button class='btn btn-radius-solid' type="submit">レーダーチャートを生成</button>
+        <button class='btn btn-radius-solid' type="submit">詳細な成績を確認する</button>
     </form>
 
     {% if session_id %}        
@@ -37,9 +37,9 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>スコア</td>
+                            <td>点数</td>
                             {% for data in score_data %}
-                            <td>{{ data.score }}</td>
+                            <td>{{ data.score }}点</td>
                             {% endfor %}
                         </tr>
                         <tr>

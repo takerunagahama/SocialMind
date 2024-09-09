@@ -1,0 +1,18 @@
+{% extends "core/base.html" %}
+
+{% block title %}診断完了{% endblock title %}
+
+{% block content %}
+    <div class="center-container">
+        <h1>回答お疲れさまでした</h1>
+        <p id="message">ただいま回答を評価しています。少々お待ちください。</p>
+
+        <div class="progress-circle">
+            <svg class="circle-svg" width="150" height="150">
+                <circle cx="75" cy="75" r="70" stroke="#f3f3f3" stroke-width="10" fill="none" />
+                <circle id="progress-bar" cx="75" cy="75" r="70" stroke="#4caf50" stroke-width="10" fill="none" stroke-dasharray="440" stroke-dashoffset="440" />
+            </svg>
+            <div class="circle-percentage" id="circle-percentage">0%</div>
+        </div>
+    </div>
+{% endblock content %}

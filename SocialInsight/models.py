@@ -12,6 +12,15 @@ ATTRIBUTE_CHOICES = [
     ('total', '合計点'),
 ]
 
+class Session(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    session_id = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Session'
+        verbose_name_plural = 'Session'
+
 class QandA(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question_text = models.TextField()
@@ -21,7 +30,7 @@ class QandA(models.Model):
     session_id = models.IntegerField()
 
     def __str__(self):
-        return f'{self.user.username}(第{self.session_id}回目)'
+        return f'{self.user.username}-第{self.session_id}回目({self.attribute})'
 
     class Meta:
         verbose_name = "Q and A"

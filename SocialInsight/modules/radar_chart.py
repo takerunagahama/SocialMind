@@ -16,19 +16,21 @@ ATTRIBUTE_CHOICES = [
 
 def generate_radar_chart(session_id):
     try:
-        qanda_session = QandA.objects.get(session_id = session_id)
+        qanda_sessions = QandA.objects.filter(session_id=session_id)
+        if not qanda_sessions.exists():
+            raise ValueError('指定されたセッションIDのデータが見つかりません')
+        
+        qanda_session = qanda_sessions.first()
     except QandA.DoesNotExist:
         raise ValueError('指定されたセッションIDのデータが見つかりません')
 
     try:
-        user_scores = Scores.objects.get(qanda_session = qanda_session)
+        user_scores = Scores.objects.get(qanda_session=qanda_session)
     except Scores.DoesNotExist:
         raise ValueError('指定されたセッションIDのスコアが見つかりません')
 
-    # 全ユーザーのスコアを取得
     all_scores = Scores.objects.all()
 
-    # 各スコアのリストを作成
     empathy_scores = [score.empathy for score in all_scores]
     organization_scores = [score.organization for score in all_scores]
     visioning_scores = [score.visioning for score in all_scores]
@@ -37,7 +39,6 @@ def generate_radar_chart(session_id):
     team_scores = [score.team for score in all_scores]
     perseverance_scores = [score.perseverance for score in all_scores]
 
-    # NumpPyで平均値を計算
     avg_empathy = np.mean(empathy_scores)
     avg_organization = np.mean(organization_scores)
     avg_visioning = np.mean(visioning_scores)
@@ -46,7 +47,6 @@ def generate_radar_chart(session_id):
     avg_team = np.mean(team_scores)
     avg_perseverance = np.mean(perseverance_scores)
 
-    # スコアのカテゴリと値を設定
     categories = [label for _, label in ATTRIBUTE_CHOICES]
 
     user_values = [
@@ -85,7 +85,6 @@ def generate_radar_chart(session_id):
     ax.set_rgrids([20, 40, 60, 80, 100], labels=["20", "40", "60", "80", "100"], angle=0, color="gray")
     ax.set_position([0.2, 0.2, 0.6, 0.6])
 
-
     for label, angle in zip(ax.get_xticklabels(), angles):
         label.set_horizontalalignment('center')
         x_offset = np.cos(angle) * 0.1  # (x方向)
@@ -94,7 +93,6 @@ def generate_radar_chart(session_id):
 
     ax.spines['polar'].set_color('lightgray')
     ax.spines['polar'].set_alpha(0.5)  # 透明度を設定 (0.0 = 完全に透明, 1.0 = 不透明)
-
 
     plt.title(f'{user_scores.user.username}-第{session_id}回目の成績')
 
