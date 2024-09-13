@@ -3,10 +3,10 @@
 {% block title %}セッションの選択{% endblock title %}
 
 {% block content %}
-    <h1>確認したい成績を選んでください</h1>
+    <h1>結果履歴</h1>
     <form method="get">
         {% csrf_token %}
-        <label for="session_id">セッションID:</label>
+        <label for="session_id">確認したい成績を選んでください：</label>
         <select name="session_id" id="session_id">
             {% for session in sessions %}
                 <option value="{{ session.id }}" {% if session.id|stringformat:"s" == session_id|stringformat:"s" %}selected{% endif %}>

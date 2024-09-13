@@ -20,4 +20,8 @@
             <p id="score"></p>
             <p id="interpretation"></p>
         </div>
+
+        <div class="button">
+            <a href="{% url 'get_bert_scores' session_id=4 %}">bertの点数確認(テスト用)</a>
+        </div>
 {% endblock content %}

@@ -54,10 +54,12 @@ def generate_question_and_model_answer(attribute):
     
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo",
             messages=[{"role": "system", "content": prompt}],
             max_tokens=300
         )
+        logger.info(f"Raw response: {response}")
+
         response_content = response.choices[0].message.content.strip()
         
         question, model_answer = json.loads(response_content)

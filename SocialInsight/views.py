@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import QandA, Messages, Session
-from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation
+from .models import QandA, Messages, Scores, Session
+from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation, calculate_bert_score
 import logging
 import random
 
@@ -46,7 +46,7 @@ def question_view(request):
 
     if request.method == 'POST':
         # 中断ボタンが押されたとき
-        if "canceled" in request.POST:
+        if "cancel" in request.POST:
             return redirect('diagnosis_complete')
 
         # ユーザーの回答を取得
@@ -94,7 +94,12 @@ def question_view(request):
 # 診断完了
 @login_required
 def diagnosis_complete(request):
-    return render(request, 'SocialInsight/diagnosis_complete.html')
+    session_id = request.session.get('current_session_id')
+    context = {
+        'session_id': session_id,
+    }
+    return render(request, 'SocialInsight/diagnosis_complete.html', context)
+
 
 def get_messages_by_category(attribute_scores, category, is_positive=True, limit=2):
     if is_positive:
@@ -191,3 +196,43 @@ def answer_list_view(request, session_id=None):
         answer_lists = []
 
     return render(request, 'SocialInsight/answer_list.html', {'answer_lists': answer_lists})
+
+@login_required
+def get_bert_scores(request, session_id):
+    qanda_records = QandA.objects.filter(session_id=session_id)
+
+    attribute_scores = {}
+
+    for record in qanda_records:
+        score = calculate_bert_score(record.model_answer, record.user_answer)
+
+        if record.attribute not in attribute_scores:
+            attribute_scores[record.attribute] = []
+        
+        attribute_scores[record.attribute].append(score)
+
+    average_scores = {}
+
+    for attribute, scores in attribute_scores.items():
+        average_scores[attribute] = sum(scores) / len(scores)
+
+    # new_scores辞書を作成
+    new_scores = {
+        'empathy': average_scores.get('empathy', 0),
+        'organization': average_scores.get('organization', 0),
+        'visioning': average_scores.get('visioning', 0),
+        'influence': average_scores.get('influence', 0),
+        'inspiration': average_scores.get('inspiration', 0),
+        'team': average_scores.get('team', 0),
+        'perseverance': average_scores.get('perseverance', 0),
+        'total': sum(average_scores.values()),  # 合計スコアを計算
+    }
+
+    # スコアを保存
+    Scores.create_new_score(user=request.user, new_scores=new_scores, qanda_session=qanda_records.first())
+
+
+    return render(request, 'SocialInsight/result_scores.html', {
+        'session_id': session_id,
+        'average_scores': average_scores
+    })

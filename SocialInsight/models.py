@@ -53,7 +53,7 @@ class Scores(models.Model):
     def create_new_score(cls, user, new_scores, qanda_session):
         return cls.objects.create(
             user = user,
-            qand_session = qanda_session,
+            qanda_session = qanda_session,
             empathy = new_scores.get('empathy', 0),
             organization = new_scores.get('organization', 0),
             visioning = new_scores.get('visioning', 0),
