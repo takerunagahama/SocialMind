@@ -7,6 +7,8 @@
 <body>
     <h1>質問に回答してください</h1>
 
+    <p>質問 {{ answered_count }} / 20</p>
+
     <form method="POST">
         {% csrf_token %}
         <p><strong>質問:</strong> {{ question_text }}</p>

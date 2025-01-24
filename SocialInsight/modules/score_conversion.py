@@ -1,5 +1,5 @@
 import numpy as np
-from SocialInsight.models import QandA, Scores
+from SocialInsight.models import QandA, Scores, Session
 
 ATTRIBUTE_CHOICES = [
     ('empathy', '共感力'),
@@ -13,43 +13,44 @@ ATTRIBUTE_CHOICES = [
 ]
 
 def score_to_deviation(session_id):
-    try:
-        qanda_sessions = QandA.objects.filter(session_id=session_id)
-        if not qanda_sessions.exists():
-            raise ValueError('指定したセッションIDのデータが見つかりません')
+    # Session のデータ取得
+    session = Session.objects.filter(session_id=session_id).first()
+    if not session:
+        raise ValueError(f"指定したセッションID {session_id} が見つかりません")
 
-        qanda_session = qanda_sessions.first()
-    except QandA.DoesNotExist:
-        raise ValueError('指定したセッションIDのデータが見つかりません')
+    # QandA データ取得
+    qanda_sessions = QandA.objects.filter(session=session)
+    if not qanda_sessions.exists():
+        raise ValueError(f"指定したセッションID {session_id} に関連する QandA が見つかりません")
 
-    try:
-        user_scores = Scores.objects.get(qanda_session=qanda_session)
-    except Scores.DoesNotExist:
-        raise ValueError('指定したセッションIDのスコアが見つかりません')
+    # Scores データ取得
+    user_scores = Scores.objects.filter(qanda_session=session).first()
+    if not user_scores:
+        raise ValueError(f"指定したセッションID {session_id} に関連するスコアが見つかりません")
 
+
+    # すべてのスコアを取得
     all_scores = Scores.objects.all()
+    if not all_scores.exists():
+        raise ValueError('スコアデータが存在しません')
 
+    # 偏差値計算の準備
     score_fields = [field[0] for field in ATTRIBUTE_CHOICES]
-
     score_data = {field: [getattr(score, field) for score in all_scores] for field in score_fields}
 
-    # 各スコアの平均値と標準偏差を計算
-    score_stats = {field: {'mean': np.mean(scores), 'std': np.std(scores)} for field, scores in score_data.items()}
+    score_stats = {
+        field: {'mean': np.mean(scores), 'std': np.std(scores)}
+        for field, scores in score_data.items()
+    }
 
+    # 偏差値計算
     deviation_values = {}
-
     for field in score_fields:
         user_score_value = getattr(user_scores, field)
         mean = score_stats[field]['mean']
         std = score_stats[field]['std']
 
-        # 標準偏差が0の場合は偏差値を50に設定
-        if std == 0:
-            deviation_value = 50
-        else:
-            deviation_value = 50 + 10 * (user_score_value - mean) / std
-        
+        deviation_value = 50 if std == 0 else 50 + 10 * (user_score_value - mean) / std
         deviation_values[field] = deviation_value
 
     return deviation_values, user_scores
-

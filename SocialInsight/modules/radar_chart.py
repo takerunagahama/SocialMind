@@ -16,36 +16,40 @@ ATTRIBUTE_CHOICES = [
 
 def generate_radar_chart(session_id):
     try:
-        qanda_sessions = QandA.objects.filter(session_id=session_id)
-        if not qanda_sessions.exists():
-            raise ValueError('指定されたセッションIDのデータが見つかりません')
-        
-        qanda_session = qanda_sessions.first()
-    except QandA.DoesNotExist:
-        raise ValueError('指定されたセッションIDのデータが見つかりません')
+        session_id = int(session_id)  # セッションIDを整数に変換
+    except ValueError:
+        raise ValueError(f"無効なセッションID: {session_id}")
 
+    # QandAデータを取得
+    qanda_sessions = QandA.objects.filter(session__session_id=session_id)
+    if not qanda_sessions.exists():
+        raise ValueError(f"指定されたセッションID {session_id} の QandA データが見つかりません")
+    qanda_session = qanda_sessions.first()
+
+    # Scoresデータを取得
     try:
-        user_scores = Scores.objects.get(qanda_session=qanda_session)
+        user_scores = Scores.objects.get(qanda_session__session_id=session_id)
     except Scores.DoesNotExist:
-        raise ValueError('指定されたセッションIDのスコアが見つかりません')
+        raise ValueError(f"指定されたセッションID {session_id} の Scores データが見つかりません")
 
+    # 全ユーザーのスコアを取得
     all_scores = Scores.objects.all()
 
-    empathy_scores = [score.empathy for score in all_scores]
-    organization_scores = [score.organization for score in all_scores]
-    visioning_scores = [score.visioning for score in all_scores]
-    influence_scores = [score.influence for score in all_scores]
-    inspiration_scores = [score.inspiration for score in all_scores]
-    team_scores = [score.team for score in all_scores]
-    perseverance_scores = [score.perseverance for score in all_scores]
+    empathy_scores = [score.empathy for score in all_scores if score.empathy is not None]
+    organization_scores = [score.organization for score in all_scores if score.organization is not None]
+    visioning_scores = [score.visioning for score in all_scores if score.visioning is not None]
+    influence_scores = [score.influence for score in all_scores if score.influence is not None]
+    inspiration_scores = [score.inspiration for score in all_scores if score.inspiration is not None]
+    team_scores = [score.team for score in all_scores if score.team is not None]
+    perseverance_scores = [score.perseverance for score in all_scores if score.perseverance is not None]
 
-    avg_empathy = np.mean(empathy_scores)
-    avg_organization = np.mean(organization_scores)
-    avg_visioning = np.mean(visioning_scores)
-    avg_influence = np.mean(influence_scores)
-    avg_inspiration = np.mean(inspiration_scores)
-    avg_team = np.mean(team_scores)
-    avg_perseverance = np.mean(perseverance_scores)
+    avg_empathy = np.mean(empathy_scores) if empathy_scores else 0
+    avg_organization = np.mean(organization_scores) if organization_scores else 0
+    avg_visioning = np.mean(visioning_scores) if visioning_scores else 0
+    avg_influence = np.mean(influence_scores) if influence_scores else 0
+    avg_inspiration = np.mean(inspiration_scores) if inspiration_scores else 0
+    avg_team = np.mean(team_scores) if team_scores else 0
+    avg_perseverance = np.mean(perseverance_scores) if perseverance_scores else 0
 
     categories = [label for _, label in ATTRIBUTE_CHOICES]
 
@@ -102,6 +106,6 @@ def generate_radar_chart(session_id):
     # バイナリデータを保存するためのバッファを作成
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png', transparent=True)
-    plt.close(fig)
+    plt.close()
     buffer.seek(0)
     return buffer
