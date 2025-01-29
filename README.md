@@ -19,11 +19,6 @@
 - **データベース:** MySQL 8.0(Dockerコンテナ内で動作)
 - **その他:** WSL2(Windows Subsystem for Linux 2)でLinux環境を利用
 
-## セットアップ手順
-### 前提条件
-1. Ubuntu 24.04 環境(WSL2)
-2. DockerとDocker Composeがインストールされていること
-
 ### インストール手順
 1. リポジトリのクローン  
     ```
