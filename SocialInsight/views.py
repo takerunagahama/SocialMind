@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .models import QandA, Messages, Scores, Session
-from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation, calculate_bert_score
+from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation, calculate_gpt_score
 import logging
 import random
 
@@ -250,24 +250,27 @@ def answer_list_view(request, session_id=None):
 
     return render(request, 'SocialInsight/answer_list.html', {'answer_lists': answer_lists})
 
+
 @login_required
+<<<<<<< Updated upstream
 def get_bert_scores(request, session_id):
     qanda_records = QandA.objects.filter(session_id=session_id)
+=======
+def get_gpt_scores(request, session_id):
+    qanda_records = QandA.objects.filter(session_id=session_id, user=request.user)
+>>>>>>> Stashed changes
 
     attribute_scores = {}
 
     for record in qanda_records:
-        score = calculate_bert_score(record.model_answer, record.user_answer)
+        gpt_result = calculate_gpt_score(record.model_answer, record.user_answer, record.attribute)
 
         if record.attribute not in attribute_scores:
             attribute_scores[record.attribute] = []
-        
-        attribute_scores[record.attribute].append(score)
 
-    average_scores = {}
+        attribute_scores[record.attribute].append(gpt_result["avg_score"])
 
-    for attribute, scores in attribute_scores.items():
-        average_scores[attribute] = sum(scores) / len(scores)
+    average_scores = {attribute: sum(scores) / len(scores) for attribute, scores in attribute_scores.items()}
 
     new_scores = {
         'empathy': average_scores.get('empathy', 0),
