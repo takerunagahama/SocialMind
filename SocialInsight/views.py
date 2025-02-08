@@ -32,9 +32,6 @@ def start_diagnosis_view(request):
 
     return redirect('question_view')
 
-
-
-
 @login_required
 def question_view(request):
     session_id = request.session.get('current_session_id')
@@ -252,13 +249,8 @@ def answer_list_view(request, session_id=None):
 
 
 @login_required
-<<<<<<< Updated upstream
-def get_bert_scores(request, session_id):
-    qanda_records = QandA.objects.filter(session_id=session_id)
-=======
 def get_gpt_scores(request, session_id):
     qanda_records = QandA.objects.filter(session_id=session_id, user=request.user)
->>>>>>> Stashed changes
 
     attribute_scores = {}
 
