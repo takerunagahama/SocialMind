@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True #os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '2fe0-119-245-135-97.ngrok-free.app']
+ALLOWED_HOSTS = ['localhost','app','socialmind-app-1']
 
 # Application definition
 
@@ -69,7 +69,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'configs.wsgi.application'
 
-CSRF_TRUSTED_ORIGINS = ['https://2fe0-119-245-135-97.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000",]
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -77,11 +77,11 @@ CSRF_TRUSTED_ORIGINS = ['https://2fe0-119-245-135-97.ngrok-free.app']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': os.environ.get('DATABASE_PORT', '3306'),
+        'NAME': os.environ.get('MYSQL_DATABASE'),
+        'USER': os.environ.get('MYSQL_USER'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
+        'HOST': 'db',
+        'PORT': '3306',
     }
 }
 

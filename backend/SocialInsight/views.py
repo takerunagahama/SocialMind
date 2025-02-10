@@ -154,7 +154,7 @@ def get_messages_by_category(attribute_scores, category, is_positive=True, limit
 @login_required
 def check_result(request):
     sessions_data = []
-    sessions = Session.objects.distinct()  # 全セッションを取得
+    sessions = Session.objects.distinct().filter(user=request.user)  # 全セッションを取得
 
     # 各セッションの偏差値を計算し、結果をまとめる
     for session in sessions:

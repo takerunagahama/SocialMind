@@ -1,0 +1,9 @@
+# app
+OPENAI_API_KEY="insert here"
+DJANGO_SECRET_KEY="insert here"
+
+# db
+MYSQL_USER="insert here"
+MYSQL_PASSWORD="insert here"
+MYSQL_ROOT_PASSWORD="insert here"
+MYSQL_DATABASE="insert here"

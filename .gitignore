@@ -35,9 +35,9 @@ db.sqlite3
 .env
 
 # Docker
-docker-compose.override.yml
-docker-compose.yml
-**/Dockerfile~
+
+
+
 
 # Unit test / coverage reports
 .coverage
