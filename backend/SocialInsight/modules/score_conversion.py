@@ -12,9 +12,9 @@ ATTRIBUTE_CHOICES = [
     ('total', '合計点'),
 ]
 
-def score_to_deviation(session_id):
+def score_to_deviation(user, session_id):
     # Session のデータ取得
-    session = Session.objects.filter(session_id=session_id).first()
+    session = Session.objects.filter(session_id=session_id, user=user).first()
     if not session:
         raise ValueError(f"指定したセッションID {session_id} が見つかりません")
 
@@ -24,7 +24,7 @@ def score_to_deviation(session_id):
         raise ValueError(f"指定したセッションID {session_id} に関連する QandA が見つかりません")
 
     # Scores データ取得
-    user_scores = Scores.objects.filter(qanda_session=session).first()
+    user_scores = Scores.objects.filter(qanda_session=session, user=user).first()
     if not user_scores:
         raise ValueError(f"指定したセッションID {session_id} に関連するスコアが見つかりません")
 
