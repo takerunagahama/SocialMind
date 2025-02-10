@@ -1,15 +1,25 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>Sign Up</title>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/signup.css' %}">
+
 </head>
 <body>
-    <h2>Sign Up</h2>
+  <div class="login-container">
+    <h2>新規登録</h2>
     <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">登録する</button>
     </form>
-    <p>Already have an account? <a href="{% url 'login' %}">Log in here</a>.</p>
+    <div class="links">
+      <span>すでにアカウントをお持ちの方</span>
+      <a href="{% url 'login' %}">ログイン</a>
+    </div>
+  </div>
 </body>
 </html>
