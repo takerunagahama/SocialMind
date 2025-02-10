@@ -8,7 +8,7 @@
         <p id="message">ただいま回答を評価しています。少々お待ちください。</p>
 
         <div class="button">
-            <a href="{% url 'get_bert_scores' session_id=session_id %}">bertの点数確認(テスト用)</a>
+            <a href="{% url 'get_gpt_scores' session_id=session_id %}">点数確認(テスト用)</a>
         </div>
     </div>
 {% endblock content %}

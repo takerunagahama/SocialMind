@@ -1,7 +1,6 @@
 from openai import OpenAI
-import os
 from SocialInsight.models import QandA
-import random
+import os
 import json
 import logging
 
@@ -33,18 +32,18 @@ evaluation_criteria = {
 }
 
 def generate_prompt(attribute):
-    """
-    質問文とモデル回答を生成するためのプロンプトを作成する関数。
-    """
     return (
-        f"{attribute_labels[attribute]}を評価するための質問を1つだけ簡潔な問題を日本語で作成し、"
-        "その質問に対する論理的で一般的な回答を100文字程度で提供してください。"
-        "戻り値は配列形式で返してください。順番は['question_text', 'model_answer']とし、"
-        "配列の各要素は文字列で囲んでください。"
-        "質問文には「質問：」は絶対につけないこと。"
-        "大学生と社会人がこたえられるような質問にすること。"
-        f"評価基準は次の通りです:{evaluation_criteria[attribute]}"
+        f"{attribute_labels[attribute]}を評価するための質問を1つだけ簡潔に作成してください。\n"
+        "質問文には『質問：』などの余計な文字を含めないこと。\n"
+        "大学生と社会人のどちらも答えられる内容にすること。\n\n"
+        "また、一般的な回答として、社会的知性値（SQ）を中央値50とした場合の"
+        "スコアがちょうど50点相当となる論理的な回答を100文字程度で示してください。\n"
+        "50点相当の回答とは、基本的な論理性がありつつも、具体例・詳細な説明が不足している回答を指します。\n\n"
+        "出力形式は **必ず** 以下のJSON配列形式とし、余計な説明は一切含めないこと。\n"
+        '["質問文", "モデル回答"]\n\n'
+        f"評価基準は次の通りです: {evaluation_criteria[attribute]}"
     )
+
 
 def generate_question_and_model_answer(attribute):
     """

@@ -8,5 +8,5 @@ urlpatterns = [
     path('radar_chart/<int:session_id>/', views.radar_chart_image, name='radar_chart_image'),
     path('answer_list/<int:session_id>/', views.answer_list_view, name='answer_list'),
     path('diagnosis_complete/', views.diagnosis_complete, name='diagnosis_complete'),
-    path('result_scores/<int:session_id>', views.get_bert_scores, name='get_bert_scores')
+    path('result_scores/<int:session_id>', views.get_gpt_scores, name='get_gpt_scores')
 ]
