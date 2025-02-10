@@ -93,3 +93,19 @@ class Messages(models.Model):
     class Meta:
         verbose_name = "Messages"
         verbose_name_plural = "Messages"
+
+class Profile(models.Model):
+    STATUS_CHOICES = (
+        ('student', '学生'),
+        ('worker', '社会人'),
+    )
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length = 20,
+        choices = STATUS_CHOICES,
+        default = 'student'
+    )
+
+    def __str__(self):
+        return f'{self.user.username}のプロフィール'

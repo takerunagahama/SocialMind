@@ -1,4 +1,4 @@
 from .text_generation import generate_question_and_model_answer
 from .radar_chart import generate_radar_chart
 from .score_conversion import score_to_deviation
-from .bert_evaluator import calculate_bert_score
+from .gpt_evaluator import calculate_gpt_score
