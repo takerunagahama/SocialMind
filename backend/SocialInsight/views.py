@@ -154,12 +154,13 @@ def get_messages_by_category(attribute_scores, category, is_positive=True, limit
 @login_required
 def check_result(request):
     sessions_data = []
-    sessions = Session.objects.distinct().filter(user=request.user)  # 全セッションを取得
+    sessions = Session.objects.filter(user=request.user).distinct()
+    selected_session_id = request.GET.get('session_id')
 
     # 各セッションの偏差値を計算し、結果をまとめる
     for session in sessions:
         try:
-            deviation_values, user_scores = score_to_deviation(session.session_id)
+            deviation_values, user_scores = score_to_deviation(request.user, session.session_id)
             sessions_data.append({
                 'id': session.session_id,
                 'deviation_value': deviation_values['total']
@@ -168,17 +169,14 @@ def check_result(request):
             logger.warning(f"セッション {session.session_id} のデータ取得失敗: {e}")
             continue
 
-    # 選択されたセッションIDを取得
-    selected_session_id = request.GET.get('session_id')
-
     if selected_session_id:
         try:
-            selected_session_id = int(selected_session_id)  # セッションIDを整数に変換
-            selected_session = Session.objects.get(session_id=selected_session_id)
-            deviation_values, user_scores = score_to_deviation(selected_session.session_id)
+            selected_session_id = int(selected_session_id)
+            selected_session = Session.objects.get(session_id=selected_session_id, user=request.user)
+            deviation_values, user_scores = score_to_deviation(request.user, selected_session.session_id)
 
             # レーダーチャートを生成
-            image_buffer = generate_radar_chart(selected_session.session_id)
+            image_buffer = generate_radar_chart(request.user, selected_session.session_id)
 
             # スコアデータを構築
             score_data = [
@@ -231,7 +229,7 @@ def check_result(request):
 
 @login_required
 def radar_chart_image(request, session_id):
-    image_buffer = generate_radar_chart(int(session_id))
+    image_buffer = generate_radar_chart(request.user, int(session_id))
     return HttpResponse(image_buffer, content_type='image/png')
 
 @login_required
@@ -241,7 +239,7 @@ def answer_list_view(request, session_id=None):
         session_id = request.POST.get('session_id')
 
     if session_id:    
-        answer_lists = QandA.objects.filter(session_id = session_id)
+        answer_lists = QandA.objects.filter(session_id=session_id, user=request.user)
     else:
         answer_lists = []
 

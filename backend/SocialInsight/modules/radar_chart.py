@@ -14,21 +14,21 @@ ATTRIBUTE_CHOICES = [
     ('perseverance', '忍耐力'),
 ]
 
-def generate_radar_chart(session_id):
+def generate_radar_chart(user, session_id):
     try:
         session_id = int(session_id)  # セッションIDを整数に変換
     except ValueError:
         raise ValueError(f"無効なセッションID: {session_id}")
 
     # QandAデータを取得
-    qanda_sessions = QandA.objects.filter(session__session_id=session_id)
+    qanda_sessions = QandA.objects.filter(session__session_id=session_id, user=user)
     if not qanda_sessions.exists():
         raise ValueError(f"指定されたセッションID {session_id} の QandA データが見つかりません")
     qanda_session = qanda_sessions.first()
 
     # Scoresデータを取得
     try:
-        user_scores = Scores.objects.get(qanda_session__session_id=session_id)
+        user_scores = Scores.objects.get(qanda_session__session_id=session_id, user=user)
     except Scores.DoesNotExist:
         raise ValueError(f"指定されたセッションID {session_id} の Scores データが見つかりません")
 
