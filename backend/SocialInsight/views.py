@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import QandA, Messages, Scores, Session
+from .models import QandA, Messages, Scores, Session, Profile
 from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation, calculate_gpt_score
 import logging
 import random
@@ -38,39 +38,31 @@ def question_view(request):
 
     # セッションが存在しない場合、新しいセッションを作成
     if not session_id:
-        # セッションが失われた場合、診断開始にリダイレクト
         return redirect('start_diagnosis')
 
     try:
-        # セッションIDに対応するSessionインスタンスを取得
         session = Session.objects.get(id=session_id, user=request.user)
     except Session.DoesNotExist:
-        # セッションが見つからない場合、診断開始ページにリダイレクト
         return redirect('start_diagnosis')
 
-    # current_session_id でのユーザーの回答数を取得
     answered_count = QandA.objects.filter(user=request.user, session=session).count()
 
-    # 20問に達したらセッションを完了状態にし、診断完了ページにリダイレクト
     if answered_count >= 20:
         session.is_completed = True
         session.save()
         return redirect('diagnosis_complete')
 
     if request.method == 'POST':
-        # 中断ボタンが押された場合
         if "cancel" in request.POST:
-            session.is_completed = True  # セッションを完了状態に
+            session.is_completed = True
             session.save()
             return redirect('diagnosis_complete')
 
-        # ユーザーの回答を取得
         user_answer = request.POST.get('user_answer')
         question_text = request.POST.get('question_text')
         model_answer = request.POST.get('model_answer')
         attribute = request.POST.get('attribute')
 
-        # QandAモデルに保存
         QandA.objects.create(
             user=request.user,
             question_text=question_text,
@@ -83,18 +75,20 @@ def question_view(request):
         return redirect('question_view')
 
     else:
-        # ユーザーに対してまだ出題していない属性を取得
         answered_attributes = QandA.objects.filter(user=request.user, session=session).values_list('attribute', flat=True)
         all_attributes = [field[0] for field in ATTRIBUTE_CHOICES]
         remaining_attributes = list(set(all_attributes) - set(answered_attributes))
 
         if remaining_attributes:
-            attribute = remaining_attributes[0]  # まだ出題されていない属性を使う
+            attribute = remaining_attributes[0]
         else:
-            attribute = random.choice(all_attributes)  # 全て出題した後はランダムに選ぶ
+            attribute = random.choice(all_attributes)
 
+        user_status = request.user.profile.get_status_display()
+        has_part_time_job = request.user.profile.has_part_time_job
+        
         # 問題文を生成
-        question_text, model_answer = generate_question_and_model_answer(attribute)
+        question_text, model_answer = generate_question_and_model_answer(attribute, user_status, has_part_time_job)
 
         context = {
             'question_text': question_text,
@@ -102,7 +96,6 @@ def question_view(request):
             'attribute': attribute,
             'answered_count': answered_count + 1
         }
-
         return render(request, 'SocialInsight/question_form.html', context)
 
 

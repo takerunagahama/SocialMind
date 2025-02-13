@@ -96,7 +96,8 @@ class Messages(models.Model):
 
 class Profile(models.Model):
     STATUS_CHOICES = (
-        ('student', '学生'),
+        ('high_schooler', '高校生'),
+        ('undergrad', '大学生'),
         ('worker', '社会人'),
     )
 
@@ -104,8 +105,11 @@ class Profile(models.Model):
     status = models.CharField(
         max_length = 20,
         choices = STATUS_CHOICES,
-        default = 'student'
+        blank=False,
+        null=False,
+        default = 'high_schooler'
     )
+    has_part_time_job = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.username}のプロフィール'

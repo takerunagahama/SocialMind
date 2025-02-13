@@ -5,15 +5,25 @@
   <meta charset="UTF-8">
   <title>Sign Up</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/signup.css' %}">
-
+  <link rel="stylesheet" href="{% static 'css/signup.css' %}?v=2">
 </head>
 <body>
   <div class="login-container">
     <h2>新規登録</h2>
     <form method="post">
       {% csrf_token %}
-      {{ form.as_p }}
+
+      {% for field in form %}
+        <div class="form-group {% if field.widget.input_type == 'radio' %}radio-group{% endif %}">
+          <label>{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <span class="error">{{ field.errors.0 }}</span>
+          {% endif %}
+        </div>
+    {% endfor %}
+    
+
       <button type="submit">登録する</button>
     </form>
     <div class="links">

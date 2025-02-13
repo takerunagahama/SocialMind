@@ -4,12 +4,6 @@ from django.contrib.auth.models import User
 from .models import Profile
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-
-
-@receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.profile.save()
-# 　ああ
+    if hasattr(instance, 'profile'):  # 🔹 プロフィールがある場合のみ保存
+        instance.profile.save()
