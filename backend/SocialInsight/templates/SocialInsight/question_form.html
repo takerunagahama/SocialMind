@@ -3,29 +3,57 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>質問フォーム</title>
-    <script src="{% static 'js/question_form.js' %}" defer></script>
+    <title>社会的知性値診断</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/question_form.css' %}">
 </head>
-<body>
-    <h1>質問に回答してください</h1>
+<body class="bg-light">
 
-    <p>質問 {{ answered_count }} / 20</p>
+    <!-- ヘッダー -->
+    <nav>
+        <div class="nav-container">
+            <span class="logo">社会的知性値診断</span>
+            <span class="text-white" id="timer">残り時間: 2:00</span>
+        </div>
+    </nav>
 
-    <form method="POST">
-        {% csrf_token %}
-        <p><strong>質問:</strong> {{ question_text }}</p>
-        <input type="hidden" name="question_text" value="{{ question_text }}">
-        <input type="hidden" name="model_answer" value="{{ model_answer }}">
-        <input type="hidden" name="attribute" value="{{ attribute }}">
+    <!-- メインコンテンツ -->
+    <div class="container mt-4">
+        <!-- 進捗バー -->
+        <div class="progress mb-4">
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ answered_count|floatformat:0 }}%;" 
+                aria-valuenow="{{ answered_count }}" aria-valuemin="0" aria-valuemax="20">
+                {{ answered_count }}/20
+            </div>
+        </div>
 
-        <label for="user_answer">あなたの回答:</label><br>
-        <textarea name="user_answer" id="user_answer" rows="4" cols="50"></textarea><br><br>
+        <div class="card shadow p-4">
+            <h5 class="mb-3">問題 {{ answered_count }} / 20</h5>
 
-        <!-- 送信ボタン -->
-        <input type="submit" value="回答を送信">
+            <div class="alert alert-info text-center">
+                <strong>質問:</strong> {{ question_text }}
+            </div>
 
-        <!-- 中断ボタン -->
-        <button type="submit" name="cancel" value="cancel" id="cancel-button">診断を中断する</button>
-    </form>
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="question_text" value="{{ question_text }}">
+                <input type="hidden" name="model_answer" value="{{ model_answer }}">
+                <input type="hidden" name="attribute" value="{{ attribute }}">
+
+                <div class="mb-3">
+                    <label for="user_answer" class="form-label">あなたの回答:</label>
+                    <textarea name="user_answer" id="user_answer" class="form-control" rows="10"></textarea>
+                    <small id="charCount" class="text-muted">現在の文字数: 0文字</small>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" name="cancel" value="cancel" class="btn btn-outline-secondary">試験を中断</button>
+                    <button type="submit" class="btn btn-primary">次へ →</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="{% static 'js/question_form.js' %}?v={{ timestamp }}" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
