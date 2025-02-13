@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>質問フォーム</title>
+    <script src="{% static 'js/question_form.js' %}" defer></script>
 </head>
 <body>
     <h1>質問に回答してください</h1>
@@ -19,10 +21,11 @@
         <label for="user_answer">あなたの回答:</label><br>
         <textarea name="user_answer" id="user_answer" rows="4" cols="50"></textarea><br><br>
 
+        <!-- 送信ボタン -->
         <input type="submit" value="回答を送信">
 
         <!-- 中断ボタン -->
-        <button type="submit" name="cancel" value="cancel">診断を中断する</button>
+        <button type="submit" name="cancel" value="cancel" id="cancel-button">診断を中断する</button>
     </form>
 </body>
 </html>
