@@ -1,12 +1,12 @@
-from openai import OpenAI
+import boto3
 import os
 import json
 import logging
 
 logger = logging.getLogger(__name__)
 
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
+client = boto3.client("bedrock-runtime", region_name="ap-northeast-1")
+modelId = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 
 evaluation_criteria = {
     "empathy": "他者の感情や視点を理解し、その立場に立って共感し、適切な対応を取る能力。",
@@ -39,20 +39,24 @@ def generate_prompt(model_answer, user_answer, attribute):
 
 def calculate_gpt_score(model_answer, user_answer, attribute):
     prompt = generate_prompt(model_answer, user_answer, attribute)
+    messages = [
+    {"role": "assistant","content": [{"text": "あなたはプロの評価者です。"}]},
+    {"role": "user","content": [{"text": prompt}]}
+]
+    inferenceConfig = {
+    "temperature": 0,
+    "maxTokens": 300,
+}
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "あなたはプロの評価者です。"},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=300
-        )
-
+        response = client.converse(
+            modelId=modelId ,
+            messages=messages,
+            inferenceConfig=inferenceConfig
+)
         logger.info(f"GPT Raw Response: {response}")
 
-        response_content = response.choices[0].message.content.strip()
+        response_content = response["output"]["message"]["content"][0]["text"]
         if not response_content:
             logger.error("GPTから空のレスポンスが返されました")
             return {"error": "GPTのレスポンスが空です"}
