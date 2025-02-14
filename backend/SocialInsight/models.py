@@ -15,7 +15,8 @@ ATTRIBUTE_CHOICES = [
 class Session(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session_id = models.IntegerField(default=0)
-    is_completed = models.BooleanField(default=False)  # 完了状態を示すフィールド
+    is_completed = models.BooleanField(default=False)
+    is_canceled = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
