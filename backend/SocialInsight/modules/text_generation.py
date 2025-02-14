@@ -1,4 +1,4 @@
-from openai import OpenAI
+import boto3
 from SocialInsight.models import QandA
 import os
 import json
@@ -8,8 +8,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # APIキーの取得
-api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=api_key)
+client = boto3.client("bedrock-runtime", region_name="ap-northeast-1")
+modelId = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 
 attribute_labels = {
     "empathy": "共感力",
@@ -68,16 +68,20 @@ def generate_question_and_model_answer(attribute, status, has_part_time_job):
     logger.info(f"変数確認 for attribute: {attribute}, status: {status}")
 
     prompt = generate_prompt(attribute, status, has_part_time_job)
-    
+    messages=[ {"role": "user","content": [{"text": prompt}]}]
+    inferenceConfig = {
+    "temperature": 0,
+    "maxTokens": 300,
+}
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": prompt}],
-            max_tokens=300
-        )
+        response = client.converse(
+            modelId=modelId ,
+            messages=messages,
+            inferenceConfig=inferenceConfig
+)
         logger.info(f"Raw response: {response}")
 
-        response_content = response.choices[0].message.content.strip()
+        response_content = response["output"]["message"]["content"][0]["text"]
         
         question, model_answer = json.loads(response_content)
         
