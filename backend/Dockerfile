@@ -1,8 +1,9 @@
 # Python 3.11のスリム版をベースイメージに設定
 FROM python:3.11-slim
 
-# 環境変数の設定
-ENV PYTHONPATH /usr/src/app
+# 環境変数の設定（仮想環境のパスも含める）
+ENV PYTHONPATH="/usr/src/app:/app/.venv/lib/python3.11/site-packages" \
+    PATH="/app/.venv/bin:$PATH"
 
 # 必要なパッケージをインストール
 RUN apt-get update && \
@@ -18,14 +19,16 @@ RUN apt-get update && \
 # 作業ディレクトリを設定
 WORKDIR /usr/src/app
 
-# 依存関係のインストール（変更が少ないためキャッシュを活用）
+# 仮想環境を作成し、依存関係をインストール
 COPY requirements.txt /usr/src/app/
 RUN python -m venv /app/.venv && \
-    . /app/.venv/bin/activate && \
-    pip install --no-cache-dir --timeout=1000 --retries=5 -r requirements.txt
+    /app/.venv/bin/pip install --no-cache-dir --timeout=1000 --retries=5 -r requirements.txt
 
 # アプリケーションのコードをコピー
 COPY . /usr/src/app
 
 # ポート8000を公開
 EXPOSE 8000
+
+
+
