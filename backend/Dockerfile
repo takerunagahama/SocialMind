@@ -13,7 +13,6 @@ RUN apt-get update && \
     pkg-config \
     default-mysql-client \
     procps \
-    git && \
     rm -rf /var/lib/apt/lists/*
 
 # 作業ディレクトリを設定
