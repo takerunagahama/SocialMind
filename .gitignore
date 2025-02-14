@@ -29,7 +29,6 @@ var/
 *.log
 db.sqlite3
 /media
-/static
 
 # Django secret key file
 .env

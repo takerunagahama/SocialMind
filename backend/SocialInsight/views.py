@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import QandA, Messages, Scores, Session
+from .models import QandA, Messages, Scores, Session, Profile
 from .modules import generate_question_and_model_answer, generate_radar_chart, score_to_deviation, calculate_gpt_score
 import logging
 import random
@@ -32,45 +32,49 @@ def start_diagnosis_view(request):
 
     return redirect('question_view')
 
+import random  # random が必要な場合は忘れずにインポート
+
 @login_required
 def question_view(request):
     session_id = request.session.get('current_session_id')
 
     # セッションが存在しない場合、新しいセッションを作成
     if not session_id:
-        # セッションが失われた場合、診断開始にリダイレクト
         return redirect('start_diagnosis')
 
     try:
-        # セッションIDに対応するSessionインスタンスを取得
         session = Session.objects.get(id=session_id, user=request.user)
     except Session.DoesNotExist:
-        # セッションが見つからない場合、診断開始ページにリダイレクト
         return redirect('start_diagnosis')
 
-    # current_session_id でのユーザーの回答数を取得
     answered_count = QandA.objects.filter(user=request.user, session=session).count()
 
-    # 20問に達したらセッションを完了状態にし、診断完了ページにリダイレクト
     if answered_count >= 20:
         session.is_completed = True
         session.save()
         return redirect('diagnosis_complete')
-
+    
+    # POSTリクエスト時の処理
     if request.method == 'POST':
-        # 中断ボタンが押された場合
         if "cancel" in request.POST:
-            session.is_completed = True  # セッションを完了状態に
-            session.save()
-            return redirect('diagnosis_complete')
+            if answered_count == 0:
+                # 一問目の場合はセッションを削除し、セッションストレージから current_session_id を除去してホームへ
+                session.delete()
+                if 'current_session_id' in request.session:
+                    del request.session['current_session_id']
+                return redirect('home')
+            else:
+                # すでに回答がある場合はキャンセルフラグを立てて診断完了ページへ
+                session.is_completed = True
+                session.is_canceled = True
+                session.save()
+                return redirect('diagnosis_complete')
 
-        # ユーザーの回答を取得
         user_answer = request.POST.get('user_answer')
         question_text = request.POST.get('question_text')
         model_answer = request.POST.get('model_answer')
         attribute = request.POST.get('attribute')
 
-        # QandAモデルに保存
         QandA.objects.create(
             user=request.user,
             question_text=question_text,
@@ -83,18 +87,20 @@ def question_view(request):
         return redirect('question_view')
 
     else:
-        # ユーザーに対してまだ出題していない属性を取得
         answered_attributes = QandA.objects.filter(user=request.user, session=session).values_list('attribute', flat=True)
         all_attributes = [field[0] for field in ATTRIBUTE_CHOICES]
         remaining_attributes = list(set(all_attributes) - set(answered_attributes))
 
         if remaining_attributes:
-            attribute = remaining_attributes[0]  # まだ出題されていない属性を使う
+            attribute = remaining_attributes[0]
         else:
-            attribute = random.choice(all_attributes)  # 全て出題した後はランダムに選ぶ
+            attribute = random.choice(all_attributes)
 
+        user_status = request.user.profile.get_status_display()
+        has_part_time_job = request.user.profile.has_part_time_job
+        
         # 問題文を生成
-        question_text, model_answer = generate_question_and_model_answer(attribute)
+        question_text, model_answer = generate_question_and_model_answer(attribute, user_status, has_part_time_job)
 
         context = {
             'question_text': question_text,
@@ -102,8 +108,8 @@ def question_view(request):
             'attribute': attribute,
             'answered_count': answered_count + 1
         }
-
         return render(request, 'SocialInsight/question_form.html', context)
+
 
 
 # 診断完了
@@ -154,12 +160,14 @@ def get_messages_by_category(attribute_scores, category, is_positive=True, limit
 @login_required
 def check_result(request):
     sessions_data = []
-    sessions = Session.objects.distinct()# 全セッションを取得
+    sessions = Session.objects.filter(user=request.user).distinct()
+    selected_session_id = request.GET.get('session_id')
 
     # 各セッションの偏差値を計算し、結果をまとめる
     for session in sessions:
         try:
-            deviation_values, user_scores = score_to_deviation(session.session_id)
+            is_canceled = bool(session.is_canceled)
+            deviation_values, user_scores = score_to_deviation(request.user, session.session_id, is_canceled)
             sessions_data.append({
                 'id': session.session_id,
                 'deviation_value': deviation_values['total']
@@ -168,17 +176,14 @@ def check_result(request):
             logger.warning(f"セッション {session.session_id} のデータ取得失敗: {e}")
             continue
 
-    # 選択されたセッションIDを取得
-    selected_session_id = request.GET.get('session_id')
-
     if selected_session_id:
         try:
-            selected_session_id = int(selected_session_id)  # セッションIDを整数に変換
-            selected_session = Session.objects.get(session_id=selected_session_id)
-            deviation_values, user_scores = score_to_deviation(selected_session.session_id)
+            selected_session_id = int(selected_session_id)
+            selected_session = Session.objects.get(session_id=selected_session_id, user=request.user)
+            deviation_values, user_scores = score_to_deviation(request.user, selected_session.session_id, is_canceled)
 
             # レーダーチャートを生成
-            image_buffer = generate_radar_chart(selected_session.session_id)
+            image_buffer = generate_radar_chart(request.user, selected_session.session_id)
 
             # スコアデータを構築
             score_data = [
@@ -228,10 +233,9 @@ def check_result(request):
     })
 
 
-
 @login_required
 def radar_chart_image(request, session_id):
-    image_buffer = generate_radar_chart(int(session_id))
+    image_buffer = generate_radar_chart(request.user, int(session_id))
     return HttpResponse(image_buffer, content_type='image/png')
 
 @login_required
@@ -241,7 +245,7 @@ def answer_list_view(request, session_id=None):
         session_id = request.POST.get('session_id')
 
     if session_id:    
-        answer_lists = QandA.objects.filter(session_id = session_id)
+        answer_lists = QandA.objects.filter(session_id=session_id, user=request.user)
     else:
         answer_lists = []
 

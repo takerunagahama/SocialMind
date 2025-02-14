@@ -29,6 +29,3 @@ COPY . /usr/src/app
 
 # ポート8000を公開
 EXPOSE 8000
-
-
-

@@ -14,21 +14,21 @@ ATTRIBUTE_CHOICES = [
     ('perseverance', '忍耐力'),
 ]
 
-def generate_radar_chart(session_id):
+def generate_radar_chart(user, session_id):
     try:
         session_id = int(session_id)  # セッションIDを整数に変換
     except ValueError:
         raise ValueError(f"無効なセッションID: {session_id}")
 
     # QandAデータを取得
-    qanda_sessions = QandA.objects.filter(session__session_id=session_id)
+    qanda_sessions = QandA.objects.filter(session__session_id=session_id, user=user)
     if not qanda_sessions.exists():
         raise ValueError(f"指定されたセッションID {session_id} の QandA データが見つかりません")
     qanda_session = qanda_sessions.first()
 
     # Scoresデータを取得
     try:
-        user_scores = Scores.objects.get(qanda_session__session_id=session_id)
+        user_scores = Scores.objects.get(qanda_session__session_id=session_id, user=user)
     except Scores.DoesNotExist:
         raise ValueError(f"指定されたセッションID {session_id} の Scores データが見つかりません")
 
@@ -74,16 +74,18 @@ def generate_radar_chart(session_id):
     ax.set_theta_offset(np.pi / 2)
     ax.set_theta_direction(-1)
 
-    user_color = '#22FFFF'
-    avg_color = '#FF00FF'
+    user_color = '#1e90ff'
+    avg_color = '#dda0dd'
 
     ax.fill(angles, user_values, color=user_color, alpha=0.25)
-    ax.plot(angles, user_values, color=user_color, linewidth=2, label='あなたの成績')
+    ax.plot(angles, user_values, color=user_color, linewidth=2, marker='o', label='あなたの成績')
 
     ax.fill(angles, avg_values, color=avg_color, alpha=0.25)
-    ax.plot(angles, avg_values, color=avg_color, linewidth=2, label='全ユーザーの平均値')
+    ax.plot(angles, avg_values, color=avg_color, linewidth=2, marker='o', linestyle='dashdot', label='全ユーザーの平均値')
 
     ax.set_yticklabels([])
+    ax.yaxis.grid(True, linestyle='-', linewidth=0.8, color='black', alpha=0.8)
+    ax.xaxis.grid(True, linestyle='-', linewidth=0.8, color='black', alpha=0.8)
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(categories, fontsize=8, color='black')
     ax.set_rgrids([20, 40, 60, 80, 100], labels=["20", "40", "60", "80", "100"], angle=0, color="gray")
@@ -95,8 +97,8 @@ def generate_radar_chart(session_id):
         y_offset = np.sin(angle) * 0.01  # (y方向)
         label.set_position((label.get_position()[0] + x_offset, label.get_position()[1] + y_offset))
 
-    ax.spines['polar'].set_color('lightgray')
-    ax.spines['polar'].set_alpha(0.5)  # 透明度を設定 (0.0 = 完全に透明, 1.0 = 不透明)
+    ax.spines['polar'].set_color('black')
+    ax.spines['polar'].set_alpha(0.8)
 
     plt.title(f'{user_scores.user.username}-第{session_id}回目の成績')
 

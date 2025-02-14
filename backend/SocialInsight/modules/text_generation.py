@@ -1,4 +1,4 @@
-from openai import OpenAI
+import boto3
 from SocialInsight.models import QandA
 import os
 import json
@@ -8,8 +8,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # APIキーの取得
-api_key = os.getenv('OPENAI_API_KEY')
-client = OpenAI(api_key=api_key)
+client = boto3.client("bedrock-runtime", region_name="ap-northeast-1")
+modelId = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 
 attribute_labels = {
     "empathy": "共感力",
@@ -31,11 +31,25 @@ evaluation_criteria = {
     "perseverance": "困難や挫折に直面しても諦めず、粘り強く取り組み続ける能力。"
 }
 
-def generate_prompt(attribute):
+def generate_prompt(attribute, status, has_part_time_job):
+    status_description = {
+        'high_schooler': '高校での自身の経験（部活、学校行事',
+        'undergrad': '大学での自身の経験（ゼミ、インターン',
+        'worker': '社会人が実務経験に基づいて答えられるように',
+    }
+
+    # アルバイトの有無を考慮
+    if status in ['high_schooler', 'undergrad']:
+        if has_part_time_job:
+            status_description[status] += '、アルバイトなど）に基づいて答えらえるように'
+        else:
+            status_description[status] += 'など）に基づいて答えられるように'
+
     return (
         f"{attribute_labels[attribute]}を評価するための質問を1つだけ簡潔に作成してください。\n"
         "質問文には『質問：』などの余計な文字を含めないこと。\n"
-        "大学生と社会人のどちらも答えられる内容にすること。\n\n"
+        f"{status_description.get(status, '適切に')}答えられる内容にすること。\n"
+        "質問内容は必ず日本語で生成する事。\n\n"
         "また、一般的な回答として、社会的知性値（SQ）を中央値50とした場合の"
         "スコアがちょうど50点相当となる論理的な回答を100文字程度で示してください。\n"
         "50点相当の回答とは、基本的な論理性がありつつも、具体例・詳細な説明が不足している回答を指します。\n\n"
@@ -45,21 +59,29 @@ def generate_prompt(attribute):
     )
 
 
-def generate_question_and_model_answer(attribute):
+def generate_question_and_model_answer(attribute, status, has_part_time_job):
     """
     指定された属性に基づいて質問文とモデル回答を生成する関数。
+
     """
-    prompt = generate_prompt(attribute)
-    
+    print(f"デバッグ確認: status={status}")
+    logger.info(f"変数確認 for attribute: {attribute}, status: {status}")
+
+    prompt = generate_prompt(attribute, status, has_part_time_job)
+    messages=[ {"role": "user","content": [{"text": prompt}]}]
+    inferenceConfig = {
+    "temperature": 0,
+    "maxTokens": 300,
+}
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": prompt}],
-            max_tokens=300
-        )
+        response = client.converse(
+            modelId=modelId ,
+            messages=messages,
+            inferenceConfig=inferenceConfig
+)
         logger.info(f"Raw response: {response}")
 
-        response_content = response.choices[0].message.content.strip()
+        response_content = response["output"]["message"]["content"][0]["text"]
         
         question, model_answer = json.loads(response_content)
         

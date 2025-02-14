@@ -24,7 +24,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 DEBUG = True #os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost','app','socialmind-app-1']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "app", "socialmind-app-1"]
 
 # Application definition
 
