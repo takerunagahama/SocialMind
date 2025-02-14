@@ -23,6 +23,7 @@ RUN python -m venv /app/.venv && \
     . /app/.venv/bin/activate && \
     pip install --no-cache-dir --timeout=1000 --retries=5 -r requirements.txt
 
+
 # アプリケーションのコードをコピー
 COPY . /usr/src/app
 
