@@ -32,6 +32,8 @@ def start_diagnosis_view(request):
 
     return redirect('question_view')
 
+import random  # random が必要な場合は忘れずにインポート
+
 @login_required
 def question_view(request):
     session_id = request.session.get('current_session_id')
@@ -51,12 +53,22 @@ def question_view(request):
         session.is_completed = True
         session.save()
         return redirect('diagnosis_complete')
-
+    
+    # POSTリクエスト時の処理
     if request.method == 'POST':
         if "cancel" in request.POST:
-            session.is_completed = True
-            session.save()
-            return redirect('diagnosis_complete')
+            if answered_count == 0:
+                # 一問目の場合はセッションを削除し、セッションストレージから current_session_id を除去してホームへ
+                session.delete()
+                if 'current_session_id' in request.session:
+                    del request.session['current_session_id']
+                return redirect('home')
+            else:
+                # すでに回答がある場合はキャンセルフラグを立てて診断完了ページへ
+                session.is_completed = True
+                session.is_canceled = True
+                session.save()
+                return redirect('diagnosis_complete')
 
         user_answer = request.POST.get('user_answer')
         question_text = request.POST.get('question_text')
@@ -97,6 +109,7 @@ def question_view(request):
             'answered_count': answered_count + 1
         }
         return render(request, 'SocialInsight/question_form.html', context)
+
 
 
 # 診断完了
@@ -153,7 +166,8 @@ def check_result(request):
     # 各セッションの偏差値を計算し、結果をまとめる
     for session in sessions:
         try:
-            deviation_values, user_scores = score_to_deviation(request.user, session.session_id)
+            is_canceled = bool(session.is_canceled)
+            deviation_values, user_scores = score_to_deviation(request.user, session.session_id, is_canceled)
             sessions_data.append({
                 'id': session.session_id,
                 'deviation_value': deviation_values['total']
@@ -166,7 +180,7 @@ def check_result(request):
         try:
             selected_session_id = int(selected_session_id)
             selected_session = Session.objects.get(session_id=selected_session_id, user=request.user)
-            deviation_values, user_scores = score_to_deviation(request.user, selected_session.session_id)
+            deviation_values, user_scores = score_to_deviation(request.user, selected_session.session_id, is_canceled)
 
             # レーダーチャートを生成
             image_buffer = generate_radar_chart(request.user, selected_session.session_id)
@@ -217,7 +231,6 @@ def check_result(request):
         'sessions': sessions_data,
         'session_id': None
     })
-
 
 
 @login_required
