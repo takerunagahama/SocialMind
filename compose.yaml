@@ -13,45 +13,46 @@ services:
     build:
       context: ./backend
     environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      #OPENAI_API_KEY: ${OPENAI_API_KEY}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_HOST: ${MYSQL_HOST}
     volumes:
       - ./backend:/usr/src/app
     depends_on:
-      - db
       - redis
+    env_file:
+      - .env
     command: |
       bash -c "
+      . /app/.venv/bin/activate && \
       python manage.py migrate &&
       python manage.py runserver 0.0.0.0:8000
       "
-  db:
-    image: mysql
-    volumes:
-    - type: volume
-      source: db_store
-      target: /var/lib/mysql
-    - type: bind
-      source: ./mysql/my.cnf
-      target: /etc/my.cnf
-      read_only: true
+  #db:
+    #image: mysql
+    #volumes:
+    #- type: volume
+      #source: db_store
+      #target: /var/lib/mysql
+    #- type: bind
+      #source: ./mysql/my.cnf
+      #target: /etc/my.cnf
+      #read_only: true
 
-    environment:
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-    ports:
-      - 3306:3306
-    command: --port 3306
+    #environment:
+      #MYSQL_USER: ${MYSQL_USER}
+      #MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      #MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      #MYSQL_DATABASE: ${MYSQL_DATABASE}
+    #ports:
+      #- 3306:3306
+    #command: --port 3306
 
   redis:
     image: redis:latest
     restart: always
     ports:
-     - 6379:6379 
-volumes:
-  db_store:  
+     - 6379:6379   

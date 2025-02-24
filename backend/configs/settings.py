@@ -24,7 +24,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
 DEBUG = True #os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "app", "socialmind-app-1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "app", "socialmind-app-1","54.250.170.218"]
 
 # Application definition
 
@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': os.environ.get('MYSQL_DATABASE'),
         'USER': os.environ.get('MYSQL_USER'),
         'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-        'HOST': 'db',
+        'HOST': os.environ.get('MYSQL_HOST'),
         'PORT': '3306',
     }
 }
