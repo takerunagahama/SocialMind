@@ -8,8 +8,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 # APIキーの取得
-client = boto3.client("bedrock-runtime", region_name="ap-northeast-1")
-modelId = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
+client = boto3.client("bedrock-runtime", region_name="us-west-2")
+modelId = 'anthropic.claude-3-sonnet-20240229-v1:0'
 
 attribute_labels = {
     "empathy": "共感力",

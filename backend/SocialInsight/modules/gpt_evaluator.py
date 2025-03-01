@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-client = boto3.client("bedrock-runtime", region_name="ap-northeast-1")
+client = boto3.client("bedrock-runtime", region_name="us-west-2")
 modelId = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 
 evaluation_criteria = {
