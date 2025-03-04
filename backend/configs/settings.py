@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 
-DEBUG = True #os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = True #False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "app", "socialmind-app-1","54.250.170.218"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "172.18.0.0/16", "app", "socialmind-app-1","10.2.0.110","54.64.249.107"]
 
 # Application definition
 
@@ -129,6 +129,8 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",

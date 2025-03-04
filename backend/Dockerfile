@@ -2,6 +2,8 @@
 FROM python:3.11-slim
 
 # 環境変数の設定
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH /usr/src/app
 
 # 必要なパッケージをインストール
@@ -25,8 +27,13 @@ RUN python -m venv /app/.venv && \
     . /app/.venv/bin/activate && \
     pip install --no-cache-dir --timeout=1000 --retries=5 -r requirements.txt
 
-# アプリケーションのコードをコピー
-COPY . /usr/src/app
+COPY ./entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# 実行権限を付与
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # ポート8000を公開
 EXPOSE 8000
+
+# ENTRYPOINTの指定を変更
+CMD ["/usr/local/bin/entrypoint.sh"]
